@@ -3,13 +3,14 @@ import path from "path";
 
 import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 
 export default {
     migrations : {
         path : path.join(__dirname,"./migrations"),
         glob : '/^[\w-]+\d+\.[tj]s$/'
     },
-    entities : [Post],
+    entities : [Post,User],
     user : process.env.POST_DB_USER,
     password : process.env.POST_DB_PASSWORD,
     dbName : "redditDB",

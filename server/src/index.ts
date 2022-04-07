@@ -9,6 +9,7 @@ import { __prod__ } from "./constants";
 import mikroOrmConfig from "./mikro-orm.config";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
+import { UserResolver } from "./resolvers/user";
 
 
 
@@ -16,12 +17,15 @@ const setup = async () => {
     const orm = await MikroORM.init(mikroOrmConfig);
     await orm.getMigrator().up();
 
+    const generator = orm.getSchemaGenerator();
+    await generator.updateSchema();
+
     const port = process.env.SERVER_PORT || 5001;
     const app = express();
 
     const apolloServer = new ApolloServer({
         schema : await buildSchema({
-            resolvers : [HelloResolver,PostResolver],
+            resolvers : [HelloResolver,PostResolver,UserResolver],
             validate : false
         }),
         context : () => ({em:orm.em})
