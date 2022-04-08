@@ -6,6 +6,7 @@ import 'dotenv/config';
 import session from "express-session";
 import { createClient } from "redis";
 import connectRedis from "connect-redis";
+import cors from "cors";
 
 import { __prod__ } from "./constants";
 import mikroOrmConfig from "./mikro-orm.config";
@@ -27,7 +28,10 @@ const setup = async () => {
     let RedisStore = connectRedis(session);
     let redisClient = createClient({ legacyMode: true })
     redisClient.connect().catch(console.error);
-
+    app.use(cors({
+        origin:'http://localhost:3000',
+        credentials: true, 
+    }))
     app.use(
         session({
         name: "qid",
@@ -56,7 +60,7 @@ const setup = async () => {
     })
     
     await apolloServer.start();
-    apolloServer.applyMiddleware({app});
+    apolloServer.applyMiddleware({app,cors:false});
 
     app.listen(port,()=>{
         console.log(`Server Listening on port :${port}`);         
