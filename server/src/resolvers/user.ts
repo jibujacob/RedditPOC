@@ -1,9 +1,11 @@
 import argon2 from "argon2";
+import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver } from "type-graphql";
+import "express-session";
+import { EntityManager } from "@mikro-orm/postgresql";
+
 import { User } from "../entities/User";
 import { MyContext } from "../Types/types";
-import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 
-import "express-session";
 declare module "express-session" {
   interface SessionData {
     userId: number;
@@ -75,9 +77,22 @@ export class UserResolver{
         }
 
         const hashedPassword = await argon2.hash(options.password);
-        const user = em.create(User,{username:options.username,password:hashedPassword});
+        //Below can be used directly from mikroorm else we can use query builder which is implemented inside the try block
+        //const user = em.create(User,{username:options.username,password:hashedPassword});
+        let user;
         try {
-            await em.persistAndFlush(user);
+            const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
+                username:options.username,
+                password:hashedPassword,
+                created_at:new Date(),
+                updated_at:new Date()
+            }).returning("*");
+            user=result[0];
+            user.createdAt=user.created_at;
+            user.updatedAt=user.updated_at;
+            delete user["created_at"];
+            delete user["updated_at"];
+            //await em.persistAndFlush(user);
         } catch (error) {
             console.log(error.message);
             if(error.code==='23505' || error.detail.includes("already exists")){
