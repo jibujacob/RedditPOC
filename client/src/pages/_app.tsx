@@ -3,7 +3,7 @@ import { createClient, dedupExchange, fetchExchange, Provider } from 'urql';
 import { cacheExchange,Cache, QueryInput } from '@urql/exchange-graphcache';
 
 import theme from '../theme'
-import { CurrentUserDocument, CurrentUserQuery, LoginMutation, RegisterMutation } from '../generated/graphql';
+import { CurrentUserDocument, CurrentUserQuery, LoginMutation, LogoutMutation, RegisterMutation } from '../generated/graphql';
 import { ResolveLayoutTransition } from 'framer-motion';
 
 function betterUpdateQuery<Result,Query>(
@@ -23,6 +23,13 @@ const client = createClient({
   exchanges: [dedupExchange, cacheExchange({
     updates: {
       Mutation: {
+        logout: (_result, args, cache, info) => {
+          betterUpdateQuery<LogoutMutation,CurrentUserQuery>(cache,
+              {query:CurrentUserDocument},
+              _result,
+              ()=> ({me:null})
+              )
+        },
         login: (_result, args, cache, info) => {
           betterUpdateQuery<LoginMutation,CurrentUserQuery>(cache,
               {query:CurrentUserDocument},
