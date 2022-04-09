@@ -125,6 +125,11 @@ export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type CurrentUserQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: number, createdAt: string, updatedAt: string, username: string } | null };
 
+export type GetPostsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetPostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, createdAt: string, updatedAt: string, title: string }> };
+
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   id
@@ -186,4 +191,18 @@ export const CurrentUserDocument = gql`
 
 export function useCurrentUserQuery(options?: Omit<Urql.UseQueryArgs<CurrentUserQueryVariables>, 'query'>) {
   return Urql.useQuery<CurrentUserQuery>({ query: CurrentUserDocument, ...options });
+};
+export const GetPostsDocument = gql`
+    query getPosts {
+  posts {
+    id
+    createdAt
+    updatedAt
+    title
+  }
+}
+    `;
+
+export function useGetPostsQuery(options?: Omit<Urql.UseQueryArgs<GetPostsQueryVariables>, 'query'>) {
+  return Urql.useQuery<GetPostsQuery>({ query: GetPostsDocument, ...options });
 };
